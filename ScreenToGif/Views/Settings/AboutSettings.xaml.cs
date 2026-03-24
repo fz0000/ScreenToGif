@@ -20,6 +20,8 @@ public partial class AboutSettings : Page
 
     private void Hyperlink_OnRequestNavigate(object sender, RequestNavigateEventArgs e)
     {
+        e.Handled = true;
+
         try
         {
             ProcessHelper.StartWithShell(e.Uri.AbsoluteUri);

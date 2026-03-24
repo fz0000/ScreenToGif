@@ -31,12 +31,13 @@ public partial class PluginSettings : Page
             new CommandBinding(_viewModel.DownloadFFmpegCommand, (_, _) => _viewModel.DownloadFFmpeg(), (_, args) => args.CanExecute = !_viewModel.IsProcessingFFmpeg),
             new CommandBinding(_viewModel.SelectFFmpegPathCommand, SelectFFmpeg_Executed, (_, args) => args.CanExecute = !_viewModel.IsProcessingFFmpeg),
             new CommandBinding(_viewModel.RemoveFFmpegCommand, RemoveFFmpeg_Executed, (_, args) => args.CanExecute = !_viewModel.IsProcessingFFmpeg && !string.IsNullOrWhiteSpace(_viewModel.FFmpegPath)),
-            new CommandBinding(_viewModel.SeeErrorFFmpegCommand, BrowseFfmpeg_Executed, BrowseFfmpeg_CanExecute),
+            new CommandBinding(_viewModel.BrowseFFmpegCommand, BrowseFfmpeg_Executed, (_, args) => args.CanExecute = _viewModel.IsFFmpegPresent),
             new CommandBinding(_viewModel.SeeErrorFFmpegCommand, SeeErrorFFmpeg_Executed, (_, args) => args.CanExecute = _viewModel.FFmpegHasError),
+
             new CommandBinding(_viewModel.DownloadGifskiCommand, (_, _) => _viewModel.DownloadGifski(), (_, args) => args.CanExecute = !_viewModel.IsProcessingGifski),
             new CommandBinding(_viewModel.SelectGifskiPathCommand, SelectGifski_Executed, (_, args) => args.CanExecute = !_viewModel.IsProcessingGifski),
             new CommandBinding(_viewModel.RemoveGifskiCommand, RemoveGifski_Executed, (_, args) => args.CanExecute = !_viewModel.IsProcessingGifski && !string.IsNullOrWhiteSpace(_viewModel.GifskiPath)),
-            new CommandBinding(_viewModel.BrowseGifskiCommand, BrowseGifski_Executed, BrowseGifski_CanExecute),
+            new CommandBinding(_viewModel.BrowseGifskiCommand, BrowseGifski_Executed, (_, args) => args.CanExecute = _viewModel.IsGifskiPresent),
             new CommandBinding(_viewModel.SeeErrorGifskiCommand, SeeErrorGifski_Executed, (_, args) => args.CanExecute = _viewModel.GifskiHasError),
         });
     }
@@ -150,11 +151,6 @@ public partial class PluginSettings : Page
     private void SeeErrorFFmpeg_Executed(object sender, ExecutedRoutedEventArgs e)
     {
         ErrorDialog.Ok("ScreenToGif", "Error downloading/unpacking FFmpeg", _viewModel.FFmpegError.Message, _viewModel.FFmpegError);
-    }
-
-    private void BrowseFfmpeg_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-    {
-        e.CanExecute = IsLoaded;// && FfmpegImageCard.Status == ExtrasStatus.Ready;
     }
 
     private void BrowseFfmpeg_Executed(object sender, ExecutedRoutedEventArgs e)
@@ -283,11 +279,6 @@ public partial class PluginSettings : Page
         ErrorDialog.Ok("ScreenToGif", "Error downloading/unpacking Gifski", _viewModel.GifskiError.Message, _viewModel.GifskiError);
     }
     
-    private void BrowseGifski_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-    {
-        e.CanExecute = IsLoaded;// && GifskiImageCard.Status == ExtrasStatus.Ready;
-    }
-    
     private void BrowseGifski_Executed(object sender, ExecutedRoutedEventArgs e)
     {
         try
@@ -313,6 +304,8 @@ public partial class PluginSettings : Page
     //Other.
     private void ExtrasHyperlink_OnRequestNavigate(object sender, RequestNavigateEventArgs e)
     {
+        e.Handled = true;
+
         try
         {
             ProcessHelper.StartWithShell(e.Uri.AbsoluteUri);
