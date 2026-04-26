@@ -444,6 +444,22 @@ public class VideoSourceViewModel : BindableBase, IDisposable
         if (timingsFound.Count == 0)
             throw new Exception("No video timing found." + log);
 
+        //Tried to find the fps of the video.
+        var fpsRegex = new Regex("(\\d+(?:\\.\\d+)?)\\s*fps", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        var fpsMatch = fpsRegex.Match(linesFound[0].Value);
+
+        double fps = 0;
+        if (fpsMatch.Success)
+        {
+            string fpsValue = fpsMatch.Groups[1].Value;
+            double.TryParse(fpsValue, CultureInfo.InvariantCulture, out fps);
+        }
+
+        if (fps == 0)
+            fps = 15; // use default value instead of throw exception
+
+        Framerate = (int)Math.Round(fps);
+
         var size = resolutionsFound[0].Value.Split('x');
 
         OriginalWidth = Convert.ToInt32(size[isRotated ? 1 : 0]);
