@@ -451,14 +451,13 @@ public class VideoSourceViewModel : BindableBase, IDisposable
         double fps = 0;
         if (fpsMatch.Success)
         {
-            string fpsValue = fpsMatch.Groups[1].Value;
+            var fpsValue = fpsMatch.Groups[1].Value;
             double.TryParse(fpsValue, CultureInfo.InvariantCulture, out fps);
         }
 
-        if (fps == 0)
-            fps = 15; // use default value instead of throw exception
-
         Framerate = (int)Math.Round(fps);
+        if (Framerate < 1)
+            Framerate = 15; // use default value instead of throw exception
 
         var size = resolutionsFound[0].Value.Split('x');
 
